@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>元析智模 — 分子动力学模拟专家 | 专业MD模拟代算服务</title>
+  <meta name="description" content="元析智模专注于全尺度分子模拟代算服务，覆盖材料、生物、医药、化学、化工、能源等领域。GROMACS/LAMMPS/Amber/Gaussian/VASP等专业工具，高效HPC算力，资深团队。">
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0a2540;
+      --navy-light: #143a63;
+      --navy-dark: #061a30;
+      --cyan: #00a8d8;
+      --cyan-light: #4dd0e1;
+      --cyan-glow: rgba(0, 168, 216, 0.15);
+      --blue: #2d6cdf;
+      --white: #ffffff;
+      --off-white: #f4f8fc;
+      --gray: #8a9bb0;
+      --gray-light: #e1e9f3;
+      --dark-text: #0a2540;
+      --muted-text: #5d7088;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 4px 20px rgba(10, 37, 64, 0.08);
+      --shadow-lg: 0 12px 40px rgba(10, 37, 64, 0.15);
+      --max-width: 1200px;
+      --font: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --mono: 'SF Mono', 'Consolas', 'Courier New', monospace;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font);
+      color: var(--dark-text);
+      background: var(--white);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 2rem; }
+
+    /* ===== Navigation ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: rgba(10, 37, 64, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: var(--transition);
+    }
+    nav .nav-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      color: var(--white);
+      font-weight: 700; font-size: 1.25rem;
+    }
+    .nav-logo .logo-mark {
+      width: 36px; height: 36px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .nav-logo .logo-mark svg { width: 100%; height: 100%; }
+    .nav-logo .logo-text { letter-spacing: 0.02em; }
+    .nav-logo .logo-text span { color: var(--cyan); }
+    .nav-links {
+      display: flex; align-items: center; gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.93rem; font-weight: 400;
+      transition: var(--transition);
+      position: relative;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -6px; left: 0;
+      width: 0; height: 2px; background: var(--cyan);
+      transition: width 0.3s;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      background: var(--cyan); color: var(--navy-dark) !important;
+      padding: 0.55rem 1.4rem; border-radius: 8px;
+      font-weight: 600; font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .nav-cta:hover { background: var(--cyan-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,168,216,0.4); }
+    .nav-cta::after { display: none; }
+    .nav-toggle { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 4px; }
+    .nav-toggle span { width: 24px; height: 2px; background: var(--white); transition: var(--transition); border-radius: 2px; }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: var(--navy-dark);
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: url('assets/hero-bg.jpg') center/cover no-repeat;
+      opacity: 0.55;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(6,26,48,0.92) 0%, rgba(10,37,64,0.75) 50%, rgba(6,26,48,0.9) 100%);
+      z-index: 1;
+    }
+    .hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, transparent 0%, rgba(6,26,48,0.6) 70%);
+      z-index: 1;
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+      width: 100%;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(0,168,216,0.12);
+      border: 1px solid rgba(0,168,216,0.3);
+      color: var(--cyan);
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.82rem; font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+    .hero-badge .pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    .hero h1 {
+      color: var(--white);
+      font-size: 3.4rem; font-weight: 700;
+      line-height: 1.15; letter-spacing: 0.01em;
+      margin-bottom: 1.2rem;
+      max-width: 720px;
+    }
+    .hero h1 .highlight { color: var(--cyan); }
+    .hero .hero-sub {
+      color: rgba(255,255,255,0.75);
+      font-size: 1.18rem; font-weight: 300;
+      line-height: 1.7;
+      max-width: 580px;
+      margin-bottom: 2.2rem;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--cyan); color: var(--navy-dark);
+      padding: 0.85rem 2rem; border-radius: 10px;
+      font-weight: 600; font-size: 1rem;
+      transition: var(--transition);
+      border: none; cursor: pointer;
+    }
+    .btn-primary:hover {
+      background: var(--cyan-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,168,216,0.35);
+    }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: transparent; color: var(--white);
+      padding: 0.85rem 2rem; border-radius: 10px;
+      font-weight: 500; font-size: 1rem;
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); }
+    .hero-stats {
+      display: flex; gap: 3rem; margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero-stat .num { font-size: 2.2rem; font-weight: 700; color: var(--cyan); }
+    .hero-stat .label { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+
+    /* ===== Section Common ===== */
+    section { padding: 5.5rem 0; }
+    .section-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.78rem; letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 0.8rem;
+    }
+    .section-title {
+      font-size: 2.2rem; font-weight: 700;
+      color: var(--dark-text); line-height: 1.25;
+      margin-bottom: 0.8rem;
+    }
+    .section-desc {
+      font-size: 1.05rem; color: var(--muted-text);
+      max-width: 640px; margin-bottom: 2.5rem;
+    }
+    .center { text-align: center; }
+    .center .section-desc { margin-left: auto; margin-right: auto; }
+
+    /* ===== About ===== */
+    #about { background: var(--off-white); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .about-text h2 { margin-bottom: 1.2rem; }
+    .about-text p { color: var(--muted-text); margin-bottom: 1rem; font-size: 1rem; }
+    .about-text .keyword { color: var(--cyan); font-weight: 600; }
+    .about-features {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin-top: 1.8rem;
+    }
+    .about-feature {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+    }
+    .about-feature .check {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--cyan-glow); color: var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; flex-shrink: 0; margin-top: 2px;
+    }
+    .about-feature span { font-size: 0.92rem; color: var(--dark-text); font-weight: 500; }
+    .about-image {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .about-image img { width: 100%; height: 100%; object-fit: cover; }
+    .about-image::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 60%, rgba(0,168,216,0.2) 100%);
+    }
+
+    /* ===== Services ===== */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .service-card {
+      background: var(--white);
+      border: 1px solid var(--gray-light);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.8rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--cyan);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .service-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: transparent; }
+    .service-card:hover::before { transform: scaleX(1); }
+    .service-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      background: var(--cyan-glow); color: var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.2rem;
+    }
+    .service-icon svg { width: 28px; height: 28px; }
+    .service-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--dark-text); }
+    .service-card p { font-size: 0.93rem; color: var(--muted-text); margin-bottom: 1rem; }
+    .service-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .service-tags span {
+      font-size: 0.75rem; font-family: var(--mono);
+      background: var(--off-white); color: var(--muted-text);
+      padding: 0.2rem 0.6rem; border-radius: 5px;
+    }
+
+    /* ===== Applications ===== */
+    #applications { background: var(--navy); color: var(--white); }
+    #applications .section-title { color: var(--white); }
+    #applications .section-desc { color: rgba(255,255,255,0.6); }
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .app-card {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .app-card img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .app-card::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(10,37,64,0.2) 0%, rgba(6,26,48,0.9) 100%);
+      transition: var(--transition);
+    }
+    .app-card:hover img { transform: scale(1.08); }
+    .app-card:hover::after { background: linear-gradient(180deg, rgba(10,37,64,0.4) 0%, rgba(0,168,216,0.5) 100%); }
+    .app-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 1.5rem; z-index: 2;
+    }
+    .app-overlay .app-domain {
+      font-family: var(--mono); font-size: 0.75rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 0.4rem;
+    }
+    .app-overlay h3 { font-size: 1.25rem; font-weight: 700; color: var(--white); margin-bottom: 0.3rem; }
+    .app-overlay p { font-size: 0.88rem; color: rgba(255,255,255,0.7); opacity: 0; max-height: 0; overflow: hidden; transition: var(--transition); }
+    .app-card:hover .app-overlay p { opacity: 1; max-height: 80px; }
+
+    /* ===== Why Us ===== */
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+    .why-card {
+      text-align: center;
+      padding: 2rem 1.2rem;
+    }
+    .why-icon {
+      width: 64px; height: 64px; margin: 0 auto 1.2rem;
+      border-radius: 50%;
+      background: var(--cyan-glow);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .why-icon::before {
+      content: ''; position: absolute; inset: -4px;
+      border: 1px dashed var(--cyan); border-radius: 50%;
+      opacity: 0.4;
+    }
+    .why-icon svg { width: 30px; height: 30px; color: var(--cyan); }
+    .why-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .why-card p { font-size: 0.9rem; color: var(--muted-text); }
+
+    /* ===== Process ===== */
+    #process { background: var(--off-white); }
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      position: relative;
+    }
+    .process-steps::before {
+      content: ''; position: absolute; top: 32px; left: 10%; right: 10%;
+      height: 2px; background: linear-gradient(90deg, var(--cyan), var(--gray-light));
+      z-index: 0;
+    }
+    .process-step { text-align: center; position: relative; z-index: 1; }
+    .step-num {
+      width: 64px; height: 64px; margin: 0 auto 1.2rem;
+      border-radius: 50%;
+      background: var(--white); border: 2px solid var(--cyan);
+      color: var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700;
+      font-family: var(--mono);
+      transition: var(--transition);
+    }
+    .process-step:hover .step-num { background: var(--cyan); color: var(--white); transform: scale(1.1); }
+    .process-step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .process-step p { font-size: 0.88rem; color: var(--muted-text); }
+
+    /* ===== Tools/Tech ===== */
+    .tools-bar {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 1rem; margin-top: 2rem;
+    }
+    .tool-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--white); border: 1px solid var(--gray-light);
+      border-radius: 10px; padding: 0.7rem 1.3rem;
+      font-family: var(--mono); font-size: 0.9rem;
+      color: var(--dark-text); font-weight: 500;
+      transition: var(--transition);
+    }
+    .tool-chip:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: var(--shadow); }
+    .tool-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); }
+
+    /* ===== CTA ===== */
+    .cta-section {
+      background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy-light) 100%);
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(0,168,216,0.15) 0%, transparent 50%);
+    }
+    .cta-content {
+      position: relative; z-index: 1;
+      text-align: center;
+      max-width: 680px; margin: 0 auto;
+    }
+    .cta-content h2 {
+      font-size: 2.4rem; font-weight: 700; color: var(--white);
+      margin-bottom: 1rem; line-height: 1.25;
+    }
+    .cta-content h2 .highlight { color: var(--cyan); }
+    .cta-content p { font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 2rem; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ===== Contact Form ===== */
+    #contact { background: var(--off-white); }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    .contact-info h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.2rem; }
+    .contact-item {
+      display: flex; align-items: flex-start; gap: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+    .contact-item .ci-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--cyan-glow); color: var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .contact-item .ci-icon svg { width: 20px; height: 20px; }
+    .contact-item .ci-label { font-size: 0.8rem; color: var(--muted-text); margin-bottom: 0.15rem; }
+    .contact-item .ci-value { font-size: 1rem; font-weight: 600; color: var(--dark-text); }
+    .contact-form {
+      background: var(--white); border-radius: var(--radius-lg);
+      padding: 2.5rem; box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
+    }
+    .form-group { margin-bottom: 1.3rem; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; color: var(--dark-text); margin-bottom: 0.5rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.75rem 1rem;
+      border: 1px solid var(--gray-light); border-radius: 10px;
+      font-family: var(--font); font-size: 0.95rem; color: var(--dark-text);
+      background: var(--off-white);
+      transition: var(--transition);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--cyan); background: var(--white);
+      box-shadow: 0 0 0 3px rgba(0,168,216,0.12);
+    }
+    .form-group textarea { resize: vertical; min-height: 100px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-submit {
+      width: 100%; background: var(--cyan); color: var(--navy-dark);
+      padding: 0.9rem; border-radius: 10px; border: none;
+      font-weight: 700; font-size: 1rem; cursor: pointer;
+      transition: var(--transition);
+    }
+    .form-submit:hover { background: var(--cyan-light); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,168,216,0.3); }
+
+    /* ===== WeChat QR Card ===== */
+    .contact-qr {
+      background: var(--white); border-radius: var(--radius-lg);
+      padding: 2.2rem; box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .contact-qr .qr-img {
+      width: 230px; height: 230px; border-radius: var(--radius);
+      object-fit: cover; margin-bottom: 1.3rem;
+      border: 1px solid var(--gray-light);
+    }
+    .contact-qr .qr-title { font-size: 1.1rem; font-weight: 700; color: var(--dark-text); margin-bottom: 0.3rem; }
+    .contact-qr .qr-sub { font-size: 0.88rem; color: var(--muted-text); max-width: 260px; }
+
+    /* ===== Footer ===== */
+    footer {
+      background: var(--navy-dark); color: rgba(255,255,255,0.6);
+      padding: 3.5rem 0 2rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-brand .nav-logo { margin-bottom: 1rem; }
+    .footer-brand p { font-size: 0.9rem; line-height: 1.7; max-width: 320px; }
+    .footer-col h4 { color: var(--white); font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.6rem; }
+    .footer-col a { font-size: 0.88rem; transition: var(--transition); }
+    .footer-col a:hover { color: var(--cyan); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.82rem;
+    }
+    .footer-bottom .icp { font-family: var(--mono); }
+
+    /* ===== Scroll Animations ===== */
+    .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.6s, transform 0.6s; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up:nth-child(2) { transition-delay: 0.1s; }
+    .fade-up:nth-child(3) { transition-delay: 0.2s; }
+    .fade-up:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 968px) {
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .hero h1 { font-size: 2.4rem; }
+      .hero .hero-sub { font-size: 1.05rem; }
+      .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
+      .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .services-grid, .app-grid { grid-template-columns: 1fr 1fr; }
+      .why-grid, .process-steps { grid-template-columns: 1fr 1fr; }
+      .process-steps::before { display: none; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .section-title { font-size: 1.8rem; }
+    }
+    @media (max-width: 600px) {
+      section { padding: 3.5rem 0; }
+      .container { padding: 0 1.2rem; }
+      .hero h1 { font-size: 1.9rem; }
+      .hero .hero-sub { font-size: 0.98rem; }
+      .hero-actions { flex-direction: column; }
+      .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .services-grid, .app-grid, .why-grid, .process-steps { grid-template-columns: 1fr; }
+      .about-features { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+      .cta-content h2 { font-size: 1.8rem; }
+      .contact-form { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navigation ===== -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="4" fill="#00a8d8"/>
+            <circle cx="20" cy="6" r="2.5" fill="#00a8d8" opacity="0.9"/>
+            <circle cx="34" cy="20" r="2.5" fill="#00a8d8" opacity="0.9"/>
+            <circle cx="20" cy="34" r="2.5" fill="#00a8d8" opacity="0.9"/>
+            <circle cx="6" cy="20" r="2.5" fill="#00a8d8" opacity="0.9"/>
+            <line x1="20" y1="20" x2="20" y2="6" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+            <line x1="20" y1="20" x2="34" y2="20" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+            <line x1="20" y1="20" x2="20" y2="34" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+            <line x1="20" y1="20" x2="6" y2="20" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+            <circle cx="20" cy="20" r="14" stroke="#4dd0e1" stroke-width="0.8" opacity="0.3" stroke-dasharray="3 3"/>
+          </svg>
+        </span>
+        <span class="logo-text">元析<span>智模</span></span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#about">关于我们</a></li>
+        <li><a href="#services">服务能力</a></li>
+        <li><a href="#applications">应用领域</a></li>
+        <li><a href="#why">核心优势</a></li>
+        <li><a href="#process">服务流程</a></li>
+        <li><a href="#contact" class="nav-cta">立即咨询</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse"></span>
+        专业分子动力学模拟代算服务平台
+      </div>
+      <h1>从原子层面<span class="highlight">解析</span>物质世界的<span class="highlight">智慧</span>之“模”</h1>
+      <p class="hero-sub">元析智模专注于全尺度分子模拟代算服务，以高效 HPC 算力与资深科研团队，为材料、生物、医药、化学、化工、能源等领域提供从建模到分析的端到端模拟解决方案。</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          开始你的模拟项目
+        </a>
+        <a href="#services" class="btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg>
+          了解服务能力
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="num">500+</div>
+          <div class="label">完成模拟项目</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num">200+</div>
+          <div class="label">服务科研团队</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num">4-7d</div>
+          <div class="label">平均交付周期</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num">20+</div>
+          <div class="label">专业模拟工具</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== About ===== -->
+  <section id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text fade-up">
+          <div class="section-tag">About Us · 关于元析智模</div>
+          <h2 class="section-title">以计算之力，解析微观世界</h2>
+          <p><span class="keyword">元析智模</span>是一家专注于分子动力学模拟代算的科技公司。"元"代表从最基本的原子、分子本源出发，"析"代表以计算之力对复杂体系进行精准解析，"智模"则寓意智能化的模拟分析。</p>
+          <p>我们依托高性能计算集群与资深科研团队，为客户提供涵盖力场建模、体系构建、长时间尺度模拟、轨迹分析与可视化报告的全流程服务，帮助科研工作者与工程师从原子层面理解材料性能、药物机理与化学反应。</p>
+          <div class="about-features">
+            <div class="about-feature">
+              <div class="check">✓</div>
+              <span>博士级科研团队</span>
+            </div>
+            <div class="about-feature">
+              <div class="check">✓</div>
+              <span>HPC 高性能算力</span>
+            </div>
+            <div class="about-feature">
+              <div class="check">✓</div>
+              <span>全流程端到端服务</span>
+            </div>
+            <div class="about-feature">
+              <div class="check">✓</div>
+              <span>论文级分析报告</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-image fade-up">
+          <img src="assets/capability-hpc.jpg" alt="高性能计算与分子模拟">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Services ===== -->
+  <section id="services">
+    <div class="container center">
+      <div class="section-tag fade-up">Services · 服务能力</div>
+      <h2 class="section-title fade-up">全栈分子模拟服务</h2>
+      <p class="section-desc fade-up">从体系搭建到结果分析，覆盖分子动力学模拟全生命周期的专业代算服务</p>
+    </div>
+    <div class="container">
+      <div class="services-grid">
+        <div class="service-card fade-up">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="3" r="1.5"/><circle cx="12" cy="21" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="21" cy="12" r="1.5"/><line x1="12" y1="9" x2="12" y2="4.5"/><line x1="12" y1="15" x2="12" y2="19.5"/><line x1="9" y1="12" x2="4.5" y2="12"/><line x1="15" y1="12" x2="19.5" y2="12"/></svg>
+          </div>
+          <h3>经典分子动力学模拟</h3>
+          <p>基于牛顿力学方程，模拟原子和分子在纳秒至微秒时间尺度上的运动轨迹，研究体系的热力学与动力学性质。</p>
+          <div class="service-tags"><span>GROMACS</span><span>LAMMPS</span><span>NAMD</span><span>Material Studio</span></div>
+        </div>
+        <div class="service-card fade-up">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>
+          </div>
+          <h3>量子化学计算</h3>
+          <p>基于 DFT 等量子化学方法，开展分子静电势分析、电子结构计算、反应路径优化与光谱模拟，从电子层面解析化学性质。</p>
+          <div class="service-tags"><span>Gaussian</span><span>ORCA</span><span>Multiwfn</span><span>Material Studio</span></div>
+        </div>
+        <div class="service-card fade-up">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          <h3>第一性原理分子动力学</h3>
+          <p>结合 DFT 方法的 AIMD 模拟，无需经验力场，从量子力学层面描述键的断裂与生成、电子转移等化学过程。</p>
+          <div class="service-tags"><span>CP2K</span><span>VASP</span><span>Q-Chem</span><span>Material Studio</span></div>
+        </div>
+        <div class="service-card fade-up">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          </div>
+          <h3>粗粒化与多尺度模拟</h3>
+          <p>从全原子到粗粒化模型，跨越多个空间与时间尺度，模拟大体系、长时间过程的生物与软物质行为。</p>
+          <div class="service-tags"><span>Martini</span><span>CGenFF</span><span>Multi-scale</span></div>
+        </div>
+        <div class="service-card fade-up">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M8 9h2"/></svg>
+          </div>
+          <h3>轨迹分析与可视化</h3>
+          <p>对模拟轨迹进行 RMSD/RMSF、径向分布函数、氢键分析等全面后处理，并生成高质量可视化图表与论文级报告。</p>
+          <div class="service-tags"><span>VMD</span><span>Python</span><span>PyMOL</span></div>
+        </div>
+        <div class="service-card fade-up">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3>自由能计算</h3>
+          <p>采用 FEP、TI、MM-PBSA 等方法精确计算结合自由能、溶剂化自由能，为药物设计与材料筛选提供定量依据。</p>
+          <div class="service-tags"><span>FEP</span><span>Umbrella Sampling</span><span>MM-PBSA</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Applications ===== -->
+  <section id="applications">
+    <div class="container center">
+      <div class="section-tag fade-up">Applications · 应用领域</div>
+      <h2 class="section-title fade-up">覆盖多学科研究场景</h2>
+      <p class="section-desc fade-up">从新材料研发到药物设计，分子模拟正在加速各领域的科学发现</p>
+    </div>
+    <div class="container">
+      <div class="app-grid">
+        <div class="app-card fade-up">
+          <img src="assets/app-materials.jpg" alt="材料科学模拟">
+          <div class="app-overlay">
+            <div class="app-domain">Materials · 材料科学</div>
+            <h3>新材料设计与性能预测</h3>
+            <p>模拟晶体缺陷、力学性能、界面行为，加速合金、高分子、纳米材料的研发周期。</p>
+          </div>
+        </div>
+        <div class="app-card fade-up">
+          <img src="assets/app-pharma.jpg" alt="药物设计模拟">
+          <div class="app-overlay">
+            <div class="app-domain">Pharma · 医药研发</div>
+            <h3>药物设计与靶点研究</h3>
+            <p>分子对接、结合自由能计算、蛋白构象分析，辅助先导化合物发现与优化。</p>
+          </div>
+        </div>
+        <div class="app-card fade-up">
+          <img src="assets/app-energy.jpg" alt="能源材料模拟">
+          <div class="app-overlay">
+            <div class="app-domain">Energy · 能源材料</div>
+            <h3>电池与催化体系模拟</h3>
+            <p>离子输运、电解质行为、催化剂反应机理模拟，助力新能源材料开发。</p>
+          </div>
+        </div>
+        <div class="app-card fade-up">
+          <img src="assets/app-chemistry-v4.jpg" alt="化学化工模拟">
+          <div class="app-overlay">
+            <div class="app-domain">Chemistry · 化学化工</div>
+            <h3>反应机理与溶剂效应</h3>
+            <p>化学反应路径、过渡态搜索、溶剂化效应分析，深入理解反应本质。</p>
+          </div>
+        </div>
+        <div class="app-card fade-up">
+          <img src="assets/app-biology.jpg" alt="生物大分子模拟">
+          <div class="app-overlay">
+            <div class="app-domain">Biology · 生命科学</div>
+            <h3>蛋白质与核酸动力学</h3>
+            <p>生物大分子构象变化、折叠机制、蛋白-配体相互作用的全原子模拟研究。</p>
+          </div>
+        </div>
+        <div class="app-card fade-up">
+          <img src="assets/app-interface.jpg" alt="界面与表面模拟">
+          <div class="app-overlay">
+            <div class="app-domain">Interface · 界面科学</div>
+            <h3>表面与界面行为模拟</h3>
+            <p>固液界面、自组装单分子层、润湿行为、吸附脱附过程的分子层面解析。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Why Us ===== -->
+  <section id="why">
+    <div class="container center">
+      <div class="section-tag fade-up">Why Choose Us · 核心优势</div>
+      <h2 class="section-title fade-up">为什么选择元析智模</h2>
+      <p class="section-desc fade-up">专业、高效、可靠——我们为每一份模拟结果负责</p>
+    </div>
+    <div class="container">
+      <div class="why-grid">
+        <div class="why-card fade-up">
+          <div class="why-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>资深科研团队</h3>
+          <p>核心成员均拥有化学、材料、生物等领域的博士学位，发表多篇高水平论文，具备丰富的模拟实战经验。</p>
+        </div>
+        <div class="why-card fade-up">
+          <div class="why-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h3>HPC 高性能算力</h3>
+          <p>自建 GPU + CPU 混合计算集群，支持大规模并行模拟，显著缩短等待时间，加速科研进程。</p>
+        </div>
+        <div class="why-card fade-up">
+          <div class="why-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <h3>结果质量保证</h3>
+          <p>每份模拟均经过严格分析与多重验证，由领域资深专家把关，确保结果可靠。</p>
+        </div>
+        <div class="why-card fade-up">
+          <div class="why-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>快速响应交付</h3>
+          <p>标准项目平均 48 小时内启动、7 天内交付，支持加急通道，配有专属顾问全程沟通对接。</p>
+        </div>
+      </div>
+      <div class="tools-bar fade-up">
+        <div class="tool-chip"><span class="dot"></span>GROMACS</div>
+        <div class="tool-chip"><span class="dot"></span>LAMMPS</div>
+        <div class="tool-chip"><span class="dot"></span>NAMD</div>
+        <div class="tool-chip"><span class="dot"></span>AMBER</div>
+        <div class="tool-chip"><span class="dot"></span>CP2K</div>
+        <div class="tool-chip"><span class="dot"></span>VASP</div>
+        <div class="tool-chip"><span class="dot"></span>VMD</div>
+        <div class="tool-chip"><span class="dot"></span>PyMOL</div>
+        <div class="tool-chip"><span class="dot"></span>Discovery Studio</div>
+        <div class="tool-chip"><span class="dot"></span>CHARMM-GUI</div>
+        <div class="tool-chip"><span class="dot"></span>Gaussian</div>
+        <div class="tool-chip"><span class="dot"></span>ORCA</div>
+        <div class="tool-chip"><span class="dot"></span>Multiwfn</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Process ===== -->
+  <section id="process">
+    <div class="container center">
+      <div class="section-tag fade-up">Workflow · 服务流程</div>
+      <h2 class="section-title fade-up">四步开启你的模拟项目</h2>
+      <p class="section-desc fade-up">简单透明的服务流程，让科研更高效</p>
+    </div>
+    <div class="container">
+      <div class="process-steps">
+        <div class="process-step fade-up">
+          <div class="step-num">01</div>
+          <h3>需求沟通</h3>
+          <p>提交研究需求，专属顾问一对一沟通，明确模拟体系、力场选择与分析目标。</p>
+        </div>
+        <div class="process-step fade-up">
+          <div class="step-num">02</div>
+          <h3>方案定制</h3>
+          <p>技术团队制定模拟方案，包括体系建模、参数设置、计算资源与时间预估。</p>
+        </div>
+        <div class="process-step fade-up">
+          <div class="step-num">03</div>
+          <h3>模拟计算</h3>
+          <p>HPC 集群执行模拟任务，实时跟进进度，定期反馈中间结果与体系稳定性。</p>
+        </div>
+        <div class="process-step fade-up">
+          <div class="step-num">04</div>
+          <h3>分析交付</h3>
+          <p>完成轨迹分析与可视化，交付论文级报告、轨迹文件与可复现脚本。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content fade-up">
+        <h2>让<span class="highlight">分子模拟</span>加速你的科研发现</h2>
+        <p>无论你是需要验证实验假设，还是探索新的研究方向，元析智模的专业团队都能为你提供从建模到分析的全方位支持。</p>
+        <div class="cta-actions">
+          <a href="#contact" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            立即提交需求
+          </a>
+          <a href="#services" class="btn-secondary">查看服务详情</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Contact ===== -->
+  <section id="contact">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="contact-info fade-up">
+          <div class="section-tag">Contact · 联系我们</div>
+          <h2 class="section-title" style="font-size:1.8rem;">开启你的模拟项目</h2>
+          <p style="color:var(--muted-text); margin-bottom:2rem;">通过以下方式联系我们，专属顾问将在 24 小时内回复。</p>
+          <div class="contact-item">
+            <div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
+            <div><div class="ci-label">邮箱咨询</div><div class="ci-value">yuanxizhimo@163.com</div></div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
+            <div><div class="ci-label">微信联系</div><div class="ci-value">yuanxizhimo</div></div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div><div class="ci-label">公司地址</div><div class="ci-value">北京市昌平区创新园区</div></div>
+          </div>
+        </div>
+        <div class="contact-qr fade-up">
+          <img class="qr-img" src="assets/wechat-qrcode.jpg" alt="元析智模企业微信二维码">
+          <div class="qr-title">微信扫码 · 添加客服</div>
+          <div class="qr-sub">扫描上方二维码，添加企业微信「元析智模-小智」</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">
+            <span class="logo-mark">
+              <svg viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="4" fill="#00a8d8"/>
+                <circle cx="20" cy="6" r="2.5" fill="#00a8d8" opacity="0.9"/>
+                <circle cx="34" cy="20" r="2.5" fill="#00a8d8" opacity="0.9"/>
+                <circle cx="20" cy="34" r="2.5" fill="#00a8d8" opacity="0.9"/>
+                <circle cx="6" cy="20" r="2.5" fill="#00a8d8" opacity="0.9"/>
+                <line x1="20" y1="20" x2="20" y2="6" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+                <line x1="20" y1="20" x2="34" y2="20" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+                <line x1="20" y1="20" x2="20" y2="34" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+                <line x1="20" y1="20" x2="6" y2="20" stroke="#4dd0e1" stroke-width="1.2" opacity="0.6"/>
+                <circle cx="20" cy="20" r="14" stroke="#4dd0e1" stroke-width="0.8" opacity="0.3" stroke-dasharray="3 3"/>
+              </svg>
+            </span>
+            <span class="logo-text">元析<span>智模</span></span>
+          </a>
+          <p>专注分子动力学模拟代算，以专业算力与科研团队，为材料、医药、化学、能源等领域提供端到端模拟解决方案。</p>
+        </div>
+        <div class="footer-col">
+          <h4>服务能力</h4>
+          <ul>
+            <li><a href="#services">经典 MD 模拟</a></li>
+            <li><a href="#services">量子化学计算</a></li>
+            <li><a href="#services">AIMD 模拟</a></li>
+            <li><a href="#services">粗粒化多尺度</a></li>
+            <li><a href="#services">轨迹分析</a></li>
+            <li><a href="#services">自由能计算</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>应用领域</h4>
+          <ul>
+            <li><a href="#applications">材料科学</a></li>
+            <li><a href="#applications">药物设计</a></li>
+            <li><a href="#applications">能源材料</a></li>
+            <li><a href="#applications">化学化工</a></li>
+            <li><a href="#applications">生命科学</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>联系我们</h4>
+          <ul>
+            <li><a href="#contact">yuanxizhimo@163.com</a></li>
+            <li><a href="#contact">微信：yuanxizhimo</a></li>
+            <li><a href="#contact">北京·昌平区创新园区</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 元析智模科技有限公司 版权所有</div>
+        <div class="icp">京ICP备XXXXXXXX号</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Navbar scroll effect =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.style.background = 'rgba(6, 26, 48, 0.95)';
+        navbar.style.boxShadow = '0 2px 20px rgba(0,0,0,0.15)';
+      } else {
+        navbar.style.background = 'rgba(10, 37, 64, 0.85)';
+        navbar.style.boxShadow = 'none';
+      }
+    });
+
+    // ===== Mobile nav toggle =====
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.querySelector('.nav-links');
+    navToggle.addEventListener('click', () => {
+      navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+      navLinks.style.position = 'absolute';
+      navLinks.style.top = '68px';
+      navLinks.style.left = '0';
+      navLinks.style.right = '0';
+      navLinks.style.flexDirection = 'column';
+      navLinks.style.background = 'rgba(6, 26, 48, 0.98)';
+      navLinks.style.padding = '1.5rem 2rem';
+      navLinks.style.gap = '1.2rem';
+    });
+
+    // ===== Scroll fade-up animation =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ===== Smooth close mobile nav on link click =====
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 968) {
+          navLinks.style.display = 'none';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
